@@ -1,22 +1,24 @@
 <template>
-  <div class="header">
-    <div class="curArea">
-      当前所在地:{{ curArea }} 现有确诊:{{ curConfirm }} 较昨日:{{
-        compareyesArea
-      }}
-    </div>
-    <div class="curCountry">
-      全国: 现有确诊:{{ countryConfirm }} 较昨日:{{ compareyesCountry }}
-    </div>
-    <div class="tips">
-      <div v-if="isIndex">当前在首页</div>
-      <div v-else>返回首页</div>
+  <div>
+    <div class="header">
+      <div class="curArea">
+        当前所在地:{{ curArea }} 现有确诊:{{ curConfirm }} 新增确诊:{{
+          compareyesArea
+        }}
+      </div>
+      <div class="curCountry">
+        全国: 现有确诊:{{ countryConfirm }} 较昨日:{{ compareyesCountry }}
+      </div>
+      <div class="tips">
+        <div v-if="isIndex">当前在首页</div>
+        <div v-else>返回首页</div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { currentAreaCityData } from "../utils/index";
+import { currentAreaCityData, currentAreaProvinceData } from "../utils/index";
 export default {
   props: {
     isIndex: {
@@ -33,45 +35,45 @@ export default {
       compareyesCountry: "-",
     };
   },
-  async mounted() {
+  mounted() {
+    let { currentArea } = this.$store.state;
+    console.log(currentArea);
+    if (currentArea.province) {
+      this.currentArea(currentArea.province, currentArea.city);
+    }
     this.getChina();
-    await this.getcurArea();
+  },
+  computed: {
+    listencurrentArea() {
+      return this.$store.state.currentArea;
+    },
+  },
+  watch: {
+    listencurrentArea: {
+      deep: true,
+      handler: function (newval) {
+        console.log(newval.province);
+
+        this.currentArea(newval.province, newval.city);
+      },
+    },
   },
   methods: {
     getChina() {
       this.countryConfirm = this.$store.state.chinaTotal.nowConfirm;
-      this.compareyesCountry =
-        this.$store.state.chinaAdd.confirm - this.$store.state.chinaAdd.heal;
+      this.compareyesCountry = this.$store.state.chinaAdd.confirm;
     },
-    currentArea() {
-      let data = this.$store.state.currentArea;
-      console.log(data.province, data.city);
+    async currentArea(province, city) {
+      this.curArea = province + city;
       let state = this.$store.state;
-      currentAreaCityData(state, data.province, data.city).then((res) => {
-        console.log(res);
-        this.curConfirm = res.total.nowConfirm;
-        this.compareyesArea = res.today.confirm;
-        
-      });
-    },
-    getcurArea() {
-      let that = this;
-      let geolocation = new BMap.Geolocation();
-      geolocation.getCurrentPosition(
-        function (res) {
-          if (this.getStatus() == BMAP_STATUS_SUCCESS) {
-            console.log(res.address);
-            that.curArea = res.address.province + res.address.city;
-            that.$store.commit("addArea", {
-              province: res.address.province.slice(0, -1),
-              city: res.address.city.slice(0, -1),
-            });
-            that.currentArea();
-          } else {
-          }
-        },
-        { enableHighAccuracy: true }
-      ); //enableHighAccuracy：是否要求浏览器获取最佳效果，默认为false
+      let res;
+      if (!city) {
+        res = await currentAreaProvinceData(state.areaTree, province);
+      } else {
+        res = await currentAreaCityData(state, province, city);
+      }
+      this.curConfirm = res.total.nowConfirm;
+      this.compareyesArea = res.today.confirm;
     },
   },
 };
@@ -81,6 +83,17 @@ export default {
 .header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+}
+.curCountry {
+  flex: 1;
+  text-align: center;
+}
+.curArea {
+  width: 30%;
+  text-align: left;
+}
+.tips {
+  width: 30%;
+  text-align: right;
 }
 </style>

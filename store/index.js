@@ -1,4 +1,5 @@
 export const state = () => ({
+  selected:'',
   areaTree: {
   },
   currentArea:{
@@ -8,11 +9,15 @@ export const state = () => ({
   mydata:{},
   lastUpdateTime:'',
   chinaTotal:{},
-  chinaAdd:{}
+  chinaAdd:{},
+  news:[]
 })
 export const mutations = {
   addTree(state, text) {
     state.areaTree = text
+  },
+  updateSelected(state, text) {
+    state.selected = text
   },
   addArea(state, text) {
     state.currentArea.province = text.province
@@ -30,4 +35,7 @@ export const mutations = {
   addmydata(state, text) {
     state.mydata = text
   },
+  addnews(state,text){
+    state.news = text
+  }
 }

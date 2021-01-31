@@ -9,9 +9,14 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
+    "@nuxtjs/axios": "^5.12.5",
+    "@nuxtjs/proxy": "^2.1.0",
+    "axios": "^0.21.1",
     "core-js": "^3.8.2",
+    "echarts": "^5.0.1",
     "element-ui": "^2.15.0",
-    "nuxt": "^2.14.12"
+    "nuxt": "^2.14.12",
+    "vue-seamless-scroll": "^1.1.23"
   },
   "devDependencies": {}
 }
